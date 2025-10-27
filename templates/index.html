@@ -1,0 +1,86 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Compás</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Compás</h1>
+      <p class="tag">On your side. Calm steps, no essays.</p>
+    </header>
+
+    <main id="chat">
+      <div class="bubble bot">
+        Hola — soy <strong>Compás</strong>. Short, practical, and on your side. What’s up?
+      </div>
+    </main>
+
+    <section class="quick">
+      <button id="giftBtn" title="Gift/gesture ideas">🎁 Gift ideas</button>
+      <button id="memBtn" title="Show saved notes">📝 Notes</button>
+    </section>
+
+    <form id="composer">
+      <input id="message" type="text" placeholder="Type here…" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const form = document.getElementById('composer');
+    const input = document.getElementById('message');
+    const giftBtn = document.getElementById('giftBtn');
+    const memBtn = document.getElementById('memBtn');
+    const sessionId = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now()+''+Math.random());
+
+    function addBubble(text, who) {
+      const div = document.createElement('div');
+      div.className = 'bubble ' + (who === 'bot' ? 'bot' : 'me');
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = input.value.trim();
+      if (!msg) return;
+      addBubble(msg, 'me');
+      input.value = '';
+
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: msg, session_id: sessionId })
+      });
+      const data = await res.json();
+      addBubble(data.reply || '(No reply)', 'bot');
+
+      if (Array.isArray(data.suggestions) && data.suggestions.length) {
+        const lines = data.suggestions.map(s => `• [${s.id}] ${s.text}`).join('\n');
+        addBubble("Suggestions:\n" + lines + "\nGive feedback with curl or a tiny admin page later.", 'bot');
+      }
+    });
+
+    giftBtn.addEventListener('click', async () => {
+      const res = await fetch('/suggest/gift', { method: 'POST' });
+      const data = await res.json();
+      const ideas = (data.ideas || []).map(i => '• ' + i).join('\n');
+      addBubble("Gift/gesture ideas:\n" + ideas, 'bot');
+    });
+
+    memBtn.addEventListener('click', async () => {
+      const res = await fetch('/memory', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cmd:'list'}) });
+      const data = await res.json();
+      const facts = (data.facts || []).map(f => '• ' + f.text).join('\n');
+      addBubble("Saved notes:\n" + (facts || '(none yet)'), 'bot');
+    });
+  </script>
+</body>
+</html>
