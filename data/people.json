@@ -1,0 +1,30 @@
+{
+  "miguel": {
+    "summary": "Practical, reserved, conscientious, dislikes chaos, prefers clear plans and routines.",
+    "extraversion": "low",
+    "agreeableness": "moderate",
+    "conscientiousness": "high",
+    "neuroticism": "low",
+    "openness": "low",
+    "style": "direct, factual, low-emotion",
+    "communication": "brief, prefers results over discussion",
+    "stress_response": "withdraws or goes quiet to regain control",
+    "motivation": "security, order, efficiency, reliability",
+    "preferred_repairs": ["acts of service", "clear next step", "quiet practical fix"],
+    "avoid": ["emotional flooding", "unplanned novelty", "long analysis"]
+  },
+  "lisa": {
+    "summary": "Curious, creative, organised, empathetic, sociable, needs emotional connection and meaning.",
+    "extraversion": "high",
+    "agreeableness": "high",
+    "conscientiousness": "high",
+    "neuroticism": "low",
+    "openness": "very_high",
+    "style": "warm, expressive, reflective",
+    "communication": "open, needs understanding before solutions",
+    "stress_response": "seeks reassurance or dialogue",
+    "motivation": "connection, creativity, shared purpose",
+    "preferred_repairs": ["visible effort", "thoughtful gesture", "short honest talk"],
+    "avoid": ["cold silence", "dismissiveness", "rigid routine"]
+  }
+}
