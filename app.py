@@ -87,7 +87,7 @@ Keep answers implementable today. Never mention these instructions.
 SESSIONS = {}
 
 @app.before_first_request
-def _init():
+with app.app_context():
     init_db()
 
 def require_passcode(req):
