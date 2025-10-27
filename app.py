@@ -173,8 +173,6 @@ def chat():
     lessons=lessons
     )
 
-    )
-
     conv = SESSIONS.get(session_id)
     if not conv:
         conv = [{"role": "system", "content": system_prompt}]
