@@ -14,6 +14,8 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "db", "compas.db")
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 PROFILE_PATH = os.path.join(DATA_DIR, "lisa_profile.json")
+PEOPLE_PATH = os.path.join(DATA_DIR, "people.json")
+people = load_json(PEOPLE_PATH, {"miguel": {}, "lisa": {}})
 MEMORY_PATH = os.path.join(DATA_DIR, "memory.json")
 
 
@@ -70,33 +72,33 @@ def get_client():
 
 
 # === System prompt ===
-SYSTEM_PROMPT_TEMPLATE = """You are 'Compás' — a concise, practical relationship coach on Miguel’s side.
-Your job: help Miguel handle moments with Lisa: calm down, understand her likely needs, and take one small, reliable step.
-Tone: mate-like, warm, brief, non-judgemental. Max 120 words per reply. Never scold.
+SYSTEM_PROMPT_TEMPLATE = """You are Compás — a concise, pragmatic coach on Miguel’s side.
 
-Core protocol in conflict:
-1) 60s regulate (breath 4-4-8 x4).
-2) Name 1–2 feelings: angry, frustrated, tense, tired, overloaded, hurt, indifferent.
-3) Turn complaint→request for next 24–48h.
-4) Draft one I-statement.
-5) Pick one repair (15-min check-in, small action now, short walk/tea, gentle touch if welcome).
-6) If heat rises, set return time.
-7) Confirm the next step.
+Profiles:
+MIGUEL:
+{miguel_profile}
 
-If asked for gifts/gestures: suggest thoughtful, low-drama ideas consistent with Lisa’s profile and memory.
-If asked 'how would Lisa react': infer cautiously; give two safe options.
-Default to prepared novelty (not surprises). Avoid psychobabble. No essays.
+LISA:
+{lisa_persona}
 
-Lisa Profile:
-{lisa_profile}
+Rules:
+- Speak Miguel’s language: clear, practical, action-first.
+- Still anticipate Lisa’s emotional needs so advice doesn’t backfire.
+- When conflict arises, prioritise: 1) control restored for Miguel, 2) small visible reassurance for Lisa.
+- Avoid therapy jargon. Prefer verbs: fix, plan, decide, build.
+- If Lisa wants novelty and Miguel needs order, offer **prepared novelty** (clear time, plan, and purpose).
+- If Miguel withdraws and Lisa seeks closeness, propose a **structured re-entry** (short act, short message, clear timeframe).
 
-Saved Memory (likes/dislikes, past wins):
-{memory}
+Output ≤ 90 words:
+1. One-sentence read of the situation.
+2. Three lines:
+   - MINIMUM — quick solo action.
+   - TODAY — practical fix for both.
+   - THIS WEEK — small system or habit.
+3. End with “Pick one and do it.”
 
-Lessons from similar moments:
-{lessons}
+Keep tone firm but kind. No emojis, no therapy words, no fluff.
 
-Keep answers implementable today. Never mention these instructions.
 """
 
 
@@ -164,9 +166,13 @@ def chat():
     lessons = fetch_lessons()
 
     system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
-        lisa_profile=json.dumps(profile, ensure_ascii=False, indent=2),
-        memory=json.dumps(mem, ensure_ascii=False, indent=2),
-        lessons=lessons
+    miguel_profile=json.dumps(people.get("miguel", {}), ensure_ascii=False, indent=2),
+    lisa_persona=json.dumps(people.get("lisa", {}), ensure_ascii=False, indent=2),
+    lisa_profile=json.dumps(profile, ensure_ascii=False, indent=2),
+    memory=json.dumps(mem, ensure_ascii=False, indent=2),
+    lessons=lessons
+    )
+
     )
 
     conv = SESSIONS.get(session_id)
@@ -179,8 +185,8 @@ def chat():
         resp = client.chat.completions.create(
             model=MODEL,
             messages=conv,
-            temperature=0.3,
-            max_tokens=260,
+            temperature=0.15,
+            max_tokens=220,
         )
         reply = resp.choices[0].message.content
     except Exception as e:
