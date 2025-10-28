@@ -1,0 +1,15 @@
+{
+  "relationship": {
+    "status": "long-term, living together, own a house together",
+    "cohabitation": true,
+    "co_owners": ["Miguel", "Lisa"],
+    "home_base": "Wassenaar, NL",
+    "assets": ["house in Wassenaar"],
+    "pets": ["4 cats"],
+    "budget_style": "sensible; prefer low-cost thoughtful gestures",
+    "logistics": ["both work full-time", "Miguel prefers familiar places"],
+    "preferred_locales": ["Leiden", "The Hague", "Haarlem", "the coast"],
+    "channels": ["WhatsApp", "in-person"],
+    "standing_rituals": ["daily micro check-in before 10:00"]
+  }
+}
