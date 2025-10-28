@@ -10,31 +10,46 @@
   <div class="app">
     <header>
       <h1>🤖 Compás</h1>
-      <div class="tag">Your relationship coach & quiet observer</div>
+      <div class="tag">Your quiet relationship coach</div>
     </header>
 
-    <main id="chat">
-      {% if response %}
-        <div class="bubble bot">{{ response }}</div>
-      {% endif %}
-    </main>
+    {% if require_passcode %}
+      <main id="chat">
+        <div class="bubble bot">Enter your access passcode to start.</div>
+        {% if error %}
+          <div class="bubble bot">{{ error }}</div>
+        {% endif %}
+      </main>
+      <form id="composer" method="POST">
+        <input type="password" name="passcode" placeholder="Passcode" required />
+        <button type="submit">Unlock</button>
+      </form>
 
-    <form id="composer" method="POST">
-      <input
-        type="password"
-        name="passcode"
-        placeholder="Passcode"
-        style="max-width: 120px"
-      />
-      <input
-        type="text"
-        name="message"
-        placeholder="Ask or describe what happened..."
-        autocomplete="off"
-        required
-      />
-      <button type="submit">Send</button>
-    </form>
+    {% else %}
+      <main id="chat">
+        {% if history %}
+          {% for msg in history %}
+            {% if msg.role == 'user' %}
+              <div class="bubble me">{{ msg.content }}</div>
+            {% else %}
+              <div class="bubble bot">{{ msg.content }}</div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <div class="bubble bot">Hola 👋 Soy Compás. ¿Qué quieres hablar hoy?</div>
+        {% endif %}
+      </main>
+
+      <form id="composer" method="POST" autocomplete="off">
+        <input
+          type="text"
+          name="message"
+          placeholder="Ask or describe what happened..."
+          required
+        />
+        <button type="submit">Send</button>
+      </form>
+    {% endif %}
   </div>
 </body>
 </html>
