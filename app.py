@@ -3,7 +3,7 @@ from openai import OpenAI
 import os
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "temporary-key")
+app.secret_key = os.getenv("SECRET_KEY", "compas-ai-stable-secret")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 PASSCODE = os.getenv("PASSCODE", "ayuda")
 
