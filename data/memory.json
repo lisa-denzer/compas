@@ -1,24 +1,11 @@
 {
   "facts": [
-    {
-      "text": "Lisa likes planned novelty (not chaotic spontaneity).",
-      "ts": "seed"
-    },
-    {
-      "text": "Lisa enjoys road trips to gardens or the coast.",
-      "ts": "seed"
-    },
-    {
-      "text": "Lisa prefers thoughtful, non-flashy gifts.",
-      "ts": "seed"
-    },
-    {
-      "text": "Vegetarian; basil obsession tolerated 😄",
-      "ts": "seed"
-    }
-
-    "Use 'I notice / Can we / Next time' phrasing; avoid 'you always'.",
-    "Prepared novelty is good; surprises under time pressure are bad.",
-    "Prefer system fixes (labels, sensors, schedules) over repeated talks."
+    { "text": "Lisa likes planned novelty (not chaotic spontaneity).", "ts": "seed" },
+    { "text": "Lisa enjoys road trips to gardens or the coast.", "ts": "seed" },
+    { "text": "Lisa prefers thoughtful, non-flashy gifts.", "ts": "seed" },
+    { "text": "Vegetarian; basil obsession tolerated 😄", "ts": "seed" },
+    { "text": "Use 'I notice / Can we / Next time' phrasing; avoid 'you always'.", "ts": "seed" },
+    { "text": "Prepared novelty is good; surprises under time pressure are bad.", "ts": "seed" },
+    { "text": "Prefer system fixes (labels, sensors, schedules) over repeated talks.", "ts": "seed" }
   ]
 }
