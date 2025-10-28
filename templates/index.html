@@ -1,55 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Compás</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compás</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🤖 Compás</h1>
+      <div class="tag">Your relationship coach & quiet observer</div>
+    </header>
 
-  <body class="min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 text-blue-900 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center space-y-6">
-      <h1 class="text-4xl font-bold text-blue-700">🤖 Compás</h1>
-      <p class="text-lg text-blue-800">
-        Your personal relationship coach and reflection companion.<br />
-        Think of me as a quiet helper that keeps empathy, curiosity, and small acts of kindness alive.
-      </p>
-
-      <form method="POST" class="space-y-4">
-        <input
-          type="password"
-          name="passcode"
-          placeholder="Enter passcode"
-          class="w-full border-2 border-blue-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-
-        <textarea
-          name="message"
-          placeholder="Write what’s on your mind..."
-          rows="4"
-          class="w-full border-2 border-blue-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        ></textarea>
-
-        <button
-          type="submit"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg shadow-md transition duration-200"
-        >
-          Ask Compás
-        </button>
-      </form>
-
+    <main id="chat">
       {% if response %}
-      <div class="mt-6 text-left bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-inner">
-        <p class="text-sm text-gray-700 whitespace-pre-line">{{ response }}</p>
-      </div>
+        <div class="bubble bot">{{ response }}</div>
       {% endif %}
+    </main>
 
-      <footer class="pt-6 text-xs text-blue-700 opacity-70">
-        © 2025 Compás | Built with ❤️ to make connection easier
-      </footer>
-    </div>
-  </body>
+    <form id="composer" method="POST">
+      <input
+        type="password"
+        name="passcode"
+        placeholder="Passcode"
+        style="max-width: 120px"
+      />
+      <input
+        type="text"
+        name="message"
+        placeholder="Ask or describe what happened..."
+        autocomplete="off"
+        required
+      />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</body>
 </html>
