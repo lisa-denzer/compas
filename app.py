@@ -1,21 +1,24 @@
 import os, json, sqlite3
 from flask import Flask, request, jsonify, render_template
 from openai import OpenAI
-from datetime import datetime
-from reflection import random_reflection, random_connection_idea, random_kindness_exercise, save_reflection_response
+from reflection import (
+    random_reflection,
+    random_connection_idea,
+    random_kindness_exercise,
+    save_reflection_response,
+)
 
 app = Flask(__name__)
 
 # -------------------- Config --------------------
 DATA_DIR       = os.path.join(os.path.dirname(__file__), "data")
-PROFILE_PATH   = os.path.join(DATA_DIR, "lisa_profile.json")
+PEOPLE_PATH    = os.path.join(DATA_DIR, "people.json")   # single source of truth
 MEMORY_PATH    = os.path.join(DATA_DIR, "memory.json")
-PEOPLE_PATH    = os.path.join(DATA_DIR, "people.json")
-DB_PATH        = os.path.join(DATA_DIR, "compas.db")  # for optional “lessons”
+DB_PATH        = os.path.join(DATA_DIR, "compas.db")     # optional “lessons”
 PORT           = int(os.environ.get("PORT", 5000))
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 MODEL          = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
-PASSCODE       = os.environ.get("PASSCODE", "")  # optional
+PASSCODE       = os.environ.get("PASSCODE", "")          # optional
 
 # -------------------- Utils --------------------
 def db_conn():
@@ -63,9 +66,7 @@ def fetch_lessons():
         conn = db_conn()
         rows = conn.execute("SELECT topic, text FROM lessons ORDER BY id DESC LIMIT 10").fetchall()
         conn.close()
-        if not rows:
-            return ""
-        return "\n".join(f"- {r['topic']}: {r['text']}" for r in rows)
+        return "\n".join(f"- {r['topic']}: {r['text']}" for r in rows) if rows else ""
     except Exception:
         return ""
 
@@ -73,10 +74,9 @@ def fetch_lessons():
 SYSTEM_PROMPT_TEMPLATE = """You are Compás — a practical, friendly coach who helps Miguel handle daily life with Lisa.
 Tone: calm, clear, respectful. Use simple UK English that is easy for non-native speakers. Prefer actions over long talks.
 
-Profiles:
+Profiles (from people.json):
 MIGUEL: {miguel_profile}
-LISA: {lisa_persona}
-Lisa’s profile: {lisa_profile}
+LISA: {lisa_profile}
 Memory: {memory}
 Lessons: {lessons}
 
@@ -121,22 +121,20 @@ def index():
 @app.route("/chat", methods=["POST"])
 def chat():
     if require_passcode(request):
-        return jsonify({"error":"unauthorised"}), 401
+        return jsonify({"error": "unauthorised"}), 401
 
     data = request.get_json(force=True)
     msg = (data.get("message") or "").strip()
     if not msg:
         return jsonify({"reply": "Empty message."})
 
-    profile = load_json(PROFILE_PATH, {})
-    mem     = load_json(MEMORY_PATH, {"facts": []})
-    people  = load_json(PEOPLE_PATH, {"miguel": {}, "lisa": {}})
+    people = load_json(PEOPLE_PATH, {"miguel": {}, "lisa": {}})
+    mem    = load_json(MEMORY_PATH, {"facts": []})
     lessons = fetch_lessons()
 
     system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
         miguel_profile=json.dumps(people.get("miguel", {}), ensure_ascii=False, indent=2),
-        lisa_persona=json.dumps(people.get("lisa", {}), ensure_ascii=False, indent=2),
-        lisa_profile=json.dumps(profile, ensure_ascii=False, indent=2),
+        lisa_profile=json.dumps(people.get("lisa", {}), ensure_ascii=False, indent=2),
         memory=json.dumps(mem, ensure_ascii=False, indent=2),
         lessons=lessons
     )
@@ -146,11 +144,11 @@ def chat():
         resp = client.chat.completions.create(
             model=MODEL,
             messages=[
-                {"role":"system", "content": system_prompt + "\n\n" + EXAMPLES},
-                {"role":"user", "content": msg},
+                {"role": "system", "content": system_prompt + "\n\n" + EXAMPLES},
+                {"role": "user", "content": msg},
             ],
             temperature=0.15,
-            max_tokens=260
+            max_tokens=300,
         )
         reply = resp.choices[0].message.content.strip()
     except Exception as e:
@@ -164,7 +162,7 @@ def chat():
 @app.route("/daily_reflection", methods=["GET"])
 def get_reflection():
     if require_passcode(request):
-        return jsonify({"error":"unauthorised"}), 401
+        return jsonify({"error": "unauthorised"}), 401
     return jsonify({
         "prompts": random_reflection(),
         "connection": random_connection_idea(),
@@ -174,7 +172,7 @@ def get_reflection():
 @app.route("/daily_reflection", methods=["POST"])
 def post_reflection():
     if require_passcode(request):
-        return jsonify({"error":"unauthorised"}), 401
+        return jsonify({"error": "unauthorised"}), 401
     data = request.get_json(force=True)
     user_id = data.get("user_id", "miguel")
     answers = data.get("answers", [])
@@ -184,9 +182,9 @@ def post_reflection():
 @app.route("/memory", methods=["POST"])
 def memory_ops():
     if require_passcode(request):
-        return jsonify({"error":"unauthorised"}), 401
+        return jsonify({"error": "unauthorised"}), 401
     data = request.get_json(force=True)
-    cmd = data.get("cmd")
+    cmd = (data.get("cmd") or "").lower()
     mem = load_json(MEMORY_PATH, {"facts": []})
 
     if cmd == "list":
@@ -194,16 +192,36 @@ def memory_ops():
     elif cmd == "add":
         item = data.get("item")
         if item:
-            mem["facts"].append(item)
+            mem.setdefault("facts", []).append(item)
             save_json(MEMORY_PATH, mem)
         return jsonify({"status": "ok"})
     elif cmd == "delete":
         key = (data.get("key") or "").lower()
         mem["facts"] = [f for f in mem.get("facts", []) if key not in str(f).lower()]
         save_json(MEMORY_PATH, mem)
-        return jsonify({"status":"ok"})
+        return jsonify({"status": "ok"})
     else:
-        return jsonify({"error":"unknown command"}), 400
+        return jsonify({"error": "unknown command"}), 400
+
+@app.route("/lessons", methods=["GET","POST","DELETE"])
+def lessons_api():
+    if require_passcode(request):
+        return jsonify({"error": "unauthorised"}), 401
+    conn = db_conn()
+    if request.method == "GET":
+        rows = conn.execute("SELECT id, topic, text FROM lessons ORDER BY id DESC LIMIT 50").fetchall()
+        conn.close()
+        return jsonify([dict(r) for r in rows])
+    data = request.get_json(force=True)
+    if request.method == "POST":
+        conn.execute("INSERT INTO lessons(topic, text) VALUES(?,?)",
+                     (data.get("topic","general"), data.get("text","")))
+        conn.commit(); conn.close()
+        return jsonify({"status":"ok"})
+    if request.method == "DELETE":
+        conn.execute("DELETE FROM lessons WHERE id=?", (int(data["id"]),))
+        conn.commit(); conn.close()
+        return jsonify({"status":"ok"})
 
 # -------------------- Main --------------------
 if __name__ == "__main__":
