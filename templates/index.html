@@ -1,78 +1,55 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Compás</title>
-  <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:760px;margin:24px auto;padding:0 12px}
-    textarea,input,button{font-size:16px}
-    .box{border:1px solid #ddd;border-radius:12px;padding:12px;margin:12px 0}
-    .reply{white-space:pre-wrap}
-  </style>
-</head>
-<body>
-  <h1>Compás</h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compás</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
 
-  <div class="box">
-    <label>Passcode (if set): <input id="pass" type="password" placeholder="optional"/></label>
-  </div>
+  <body class="min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 text-blue-900 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center space-y-6">
+      <h1 class="text-4xl font-bold text-blue-700">🤖 Compás</h1>
+      <p class="text-lg text-blue-800">
+        Your personal relationship coach and reflection companion.<br />
+        Think of me as a quiet helper that keeps empathy, curiosity, and small acts of kindness alive.
+      </p>
 
-  <div class="box">
-    <textarea id="msg" rows="3" style="width:100%" placeholder="Type your situation..."></textarea>
-    <button onclick="sendChat()">Send</button>
-    <div id="out" class="reply"></div>
-  </div>
+      <form method="POST" class="space-y-4">
+        <input
+          type="password"
+          name="passcode"
+          placeholder="Enter passcode"
+          class="w-full border-2 border-blue-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
-  <div class="box">
-    <h3>Daily reflection</h3>
-    <button onclick="loadReflection()">New reflection</button>
-    <div id="reflection-prompts"></div>
-    <div id="kindness"></div>
-    <textarea id="reflection-answers" rows="4" style="width:100%" placeholder="Write short notes here, one per line..."></textarea>
-    <button onclick="saveReflection()">Save reflection</button>
-    <div id="saved"></div>
-  </div>
+        <textarea
+          name="message"
+          placeholder="Write what’s on your mind..."
+          rows="4"
+          class="w-full border-2 border-blue-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        ></textarea>
 
-<script>
-function headers() {
-  const h = { "Content-Type": "application/json" };
-  const pass = document.getElementById("pass").value.trim();
-  if (pass) h["X-PASSCODE"] = pass;
-  return h;
-}
+        <button
+          type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg shadow-md transition duration-200"
+        >
+          Ask Compás
+        </button>
+      </form>
 
-async function sendChat(){
-  const res = await fetch("/chat", {
-    method:"POST",
-    headers: headers(),
-    body: JSON.stringify({ message: document.getElementById("msg").value })
-  });
-  const data = await res.json();
-  document.getElementById("out").textContent = data.reply || data.error || "(no reply)";
-}
+      {% if response %}
+      <div class="mt-6 text-left bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-inner">
+        <p class="text-sm text-gray-700 whitespace-pre-line">{{ response }}</p>
+      </div>
+      {% endif %}
 
-async function loadReflection(){
-  const res = await fetch("/daily_reflection", { headers: headers() });
-  const data = await res.json();
-  if (data.error) { document.getElementById("reflection-prompts").textContent = data.error; return; }
-  document.getElementById("reflection-prompts").innerHTML =
-    data.prompts.map(p => `<p>• ${p}</p>`).join("");
-  document.getElementById("kindness").innerHTML =
-    `<p><strong>Connection idea:</strong> ${data.connection}</p>
-     <p><strong>Exercise:</strong> ${data.kindness}</p>`;
-}
-
-async function saveReflection(){
-  const answers = document.getElementById("reflection-answers").value.split("\n").filter(x=>x.trim());
-  const res = await fetch("/daily_reflection", {
-    method:"POST",
-    headers: headers(),
-    body: JSON.stringify({ user_id:"miguel", answers })
-  });
-  if (res.ok) { document.getElementById("saved").textContent = "Saved."; }
-  else { document.getElementById("saved").textContent = "Error saving."; }
-}
-</script>
-</body>
+      <footer class="pt-6 text-xs text-blue-700 opacity-70">
+        © 2025 Compás | Built with ❤️ to make connection easier
+      </footer>
+    </div>
+  </body>
 </html>
