@@ -1,54 +1,78 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
   <title>Compás</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>🤖 Compás</h1>
-      <div class="tag">Your quiet relationship coach</div>
+      <h1>Compás</h1>
+      <div class="tag">Gentle, practical coaching for Miguel</div>
     </header>
 
     {% if require_passcode %}
-      <main id="chat">
-        <div class="bubble bot">Enter your access passcode to start.</div>
-        {% if error %}
-          <div class="bubble bot">{{ error }}</div>
-        {% endif %}
-      </main>
-      <form id="composer" method="POST">
-        <input type="password" name="passcode" placeholder="Passcode" required />
-        <button type="submit">Unlock</button>
+      <form method="post" class="passform">
+        <input type="password" name="passcode" placeholder="Passcode" autofocus>
+        <button type="submit">Enter</button>
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
       </form>
-
     {% else %}
-      <main id="chat">
-        {% if history %}
-          {% for msg in history %}
-            {% if msg.role == 'user' %}
-              <div class="bubble me">{{ msg.content }}</div>
-            {% else %}
-              <div class="bubble bot">{{ msg.content }}</div>
-            {% endif %}
-          {% endfor %}
-        {% else %}
-          <div class="bubble bot">Hola 👋 Soy Compás. ¿Qué quieres hablar hoy?</div>
-        {% endif %}
-      </main>
 
-      <form id="composer" method="POST" autocomplete="off">
-        <input
-          type="text"
-          name="message"
-          placeholder="Ask or describe what happened..."
-          required
-        />
-        <button type="submit">Send</button>
+    <!-- Reset / Quick actions -->
+    <div class="quick">
+      <form method="post" title="Archive current session and start fresh">
+        <input type="hidden" name="reset" value="1">
+        <button>Start New Session</button>
       </form>
+
+      <form method="post">
+        <input type="hidden" name="message" value="Give me one tiny morning check-in; include a copy-ready message and one 2-minute action.">
+        <button>Check-in</button>
+      </form>
+      <form method="post">
+        <input type="hidden" name="message" value="We felt tense. Give me a REPAIR step using PAUSE; one line to say; one low-effort action.">
+        <button>Repair</button>
+      </form>
+      <form method="post">
+        <input type="hidden" name="message" value="Plan something familiar for Saturday with minimal effort; include exact words to ask Lisa.">
+        <button>Plan</button>
+      </form>
+    </div>
+
+    <div id="chat">
+      {% if sessions|length == 0 %}
+        <div class="bubble bot">Welcome to Compás.</div>
+      {% endif %}
+
+      {% for s in sessions %}
+        <div class="session-header">
+          <span>Session started {{ s.started_at }}</span>
+          {% if loop.index0 == current_idx %}
+            <span class="pill">current</span>
+          {% endif %}
+        </div>
+
+        {% for m in s.messages %}
+          <div class="bubble {{ 'me' if m.role == 'user' else 'bot' }}">
+            <div class="msg">{{ m.content }}</div>
+            <div class="stamp">{{ m.ts }}</div>
+          </div>
+        {% endfor %}
+
+        {% if not loop.last %}
+          <hr class="session-divider">
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <form id="composer" method="post">
+      <input name="message" type="text" placeholder="Type (or just tap a quick button)..." autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+
     {% endif %}
   </div>
 </body>
