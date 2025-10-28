@@ -1,6 +1,6 @@
 {
   "miguel": {
-    "summary": "Practical, reserved, conscientious, dislikes chaos, prefers clear plans and routines.",
+    "summary": "Practical, reserved, conscientious, prefers plans and routines.",
     "extraversion": "low",
     "agreeableness": "moderate",
     "conscientiousness": "high",
@@ -9,12 +9,12 @@
     "style": "direct, factual, low-emotion",
     "communication": "brief, prefers results over discussion",
     "stress_response": "withdraws or goes quiet to regain control",
-    "motivation": "security, order, efficiency, reliability",
+    "motivation": "security, order, reliability",
     "preferred_repairs": ["acts of service", "clear next step", "quiet practical fix"],
-    "avoid": ["emotional flooding", "unplanned novelty", "long analysis"]
+    "avoid": ["unplanned novelty", "long analysis during stress"]
   },
   "lisa": {
-    "summary": "Curious, creative, organised, empathetic, sociable, needs emotional connection and meaning.",
+    "summary": "Curious, creative, sociable, empathetic, organised; needs emotional connection and meaning.",
     "extraversion": "high",
     "agreeableness": "high",
     "conscientiousness": "high",
@@ -22,9 +22,9 @@
     "openness": "very_high",
     "style": "warm, expressive, reflective",
     "communication": "open, needs understanding before solutions",
-    "stress_response": "seeks reassurance or dialogue",
+    "stress_response": "seeks reassurance or short dialogue",
     "motivation": "connection, creativity, shared purpose",
     "preferred_repairs": ["visible effort", "thoughtful gesture", "short honest talk"],
-    "avoid": ["cold silence", "dismissiveness", "rigid routine"]
+    "avoid": ["cold silence", "stonewalling", "rigid routine only"]
   }
 }
